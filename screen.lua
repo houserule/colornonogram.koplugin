@@ -80,6 +80,7 @@ function ColorNonogramScreen:buildLayout()
             self:makeDailyButtonConfig(),
             { text = self:getSizeButtonText(), callback = function() self:openSizeMenu() end },
             { text = self:getDiffButtonText(), callback = function() self:openDifficultyMenu() end },
+            { text = self:getDisplayButtonText(), callback = function() self:openDisplayMenu() end },
             { text = _("Show solution"),       callback = function() self:onReveal() end },
             self:makeRulesButtonConfig(GAME_RULES_EN, GAME_RULES_FR),
         }
@@ -109,6 +110,7 @@ function ColorNonogramScreen:buildLayout()
         board        = self.board,
         max_width    = budget_w - frame_extra,
         max_height   = budget_h - frame_extra,
+        display_mode = self:getDisplayMode(),
         onCellTap_cb = function(r, c) self:onCellTap(r, c) end,
     }
     local board_frame = FrameContainer:new{
@@ -249,6 +251,47 @@ end
 function ColorNonogramScreen:getSizeButtonText()
     local n = self.board.n
     return T(_("Size: %1"), n .. "\xC3\x97" .. n)
+end
+
+-- Until the player picks one, follow KOReader's own colour rendering choice
+-- (Settings > Screen > Color rendering, which defaults to on for colour
+-- screens), so colour e-readers get colours and greyscale ones get greys.
+local DISPLAY_MODES = {
+    { id = "original",  text = _("Original") },
+    { id = "patterns",  text = _("Patterns") },
+    { id = "color",     text = _("Red, green, blue") },
+    { id = "color_alt", text = _("Blue, orange, purple") },
+}
+
+function ColorNonogramScreen:getDisplayMode()
+    local mode = self.plugin:getSetting("display_mode")
+    for _, m in ipairs(DISPLAY_MODES) do
+        if m.id == mode then return mode end
+    end
+    return DeviceScreen:isColorEnabled() and "color" or "original"
+end
+
+function ColorNonogramScreen:getDisplayButtonText()
+    local mode, label = self:getDisplayMode()
+    for _, m in ipairs(DISPLAY_MODES) do
+        if m.id == mode then label = m.text end
+    end
+    return T(_("Display: %1"), label)
+end
+
+function ColorNonogramScreen:openDisplayMenu()
+    MenuHelper.openPickerMenu{
+        title      = _("Display"),
+        items      = DISPLAY_MODES,
+        current_id = self:getDisplayMode(),
+        parent     = self,
+        on_select  = function(mode)
+            self.plugin:saveSetting("display_mode", mode)
+            self.board_widget.display_mode = mode
+            -- Every filled cell changes at once; flash to avoid ghosting on e-ink.
+            UIManager:setDirty(self, function() return "flashui", self.board_widget.paint_rect end)
+        end,
+    }
 end
 
 function ColorNonogramScreen:getDiffButtonText()

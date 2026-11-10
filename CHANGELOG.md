@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- Display modes, chosen from the menu → Display: *Original* (same as before,
+  for greyscale e-ink) *Patterns* (solid black, stripes and dots, for
+  greyscale e-ink), *Red, green, blue* and *Blue, orange, purple* (for colour
+  e-ink; the second set avoids the red/green pair). Defaults to *Red, green,
+  blue* when KOReader's colour rendering is on, otherwise *Patterns*.
+  Replaces the three grey shades, which were hard to tell apart on e-ink.
+
+### Changed
+- The wrong-cell marker is now a black square with a white rim, so it
+  shows on every fill.
+
 ## [1.6.0] - 2026-11-06
 
 ### Changed
