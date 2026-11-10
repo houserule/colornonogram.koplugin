@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
   Replaces the three grey shades, which were hard to tell apart on e-ink.
 
 ### Changed
+- Check ignores untouched cells and flags only incorrect entered answers.
 - Tapping a cell no longer cycles through the colours; it applies the
   palette's active colour or mark.
 - The wrong-cell marker is now a black square with a white rim, so it

@@ -163,6 +163,19 @@ describe("ColorNonogramBoard", function()
             assert.is_true(b.wrong[filled_r][filled_c])
         end)
 
+        it("check ignores unmarked cells", function()
+            local b = newBoard()
+            local filled_r, filled_c
+            for r = 1, b.n do
+                for c = 1, b.n do
+                    if b.solution[r][c] > 0 then filled_r, filled_c = r, c end
+                end
+            end
+            b:check()
+            assert.are.equal(0, b.user[filled_r][filled_c])
+            assert.is_false(b.wrong[filled_r][filled_c])
+        end)
+
         it("check flags a cell that differs from the solution", function()
             local b = newBoard()
             b.user[1][1] = (b.solution[1][1] % 3) + 1

@@ -419,12 +419,6 @@ function ColorNonogramBoard:setCellColor(r, c, v)
     return true
 end
 
--- The mark is a solving aid only: for checking and winning it counts as an
--- empty cell.
-local function effective(v)
-    return v == MARKED and 0 or v
-end
-
 function ColorNonogramBoard:undoMove()
     local entry = self.undo:pop()
     if not entry then return false end
@@ -435,9 +429,12 @@ end
 
 function ColorNonogramBoard:check()
     local n = self.n
+    -- Zero is unanswered; MARKED is an explicit empty answer to validate.
     for r = 1, n do
         for c = 1, n do
-            self.wrong[r][c] = (effective(self.user[r][c]) ~= self.solution[r][c])
+            local value = self.user[r][c]
+            self.wrong[r][c] = value ~= 0
+                and (value == MARKED and 0 or value) ~= self.solution[r][c]
         end
     end
 end

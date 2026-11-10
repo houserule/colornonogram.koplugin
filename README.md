@@ -26,7 +26,7 @@ Like a Nonogram but cells are filled with colours. Each clue gives a colour and 
   - *Blue, orange, purple*: for colour e-ink, easier to tell apart with red-green colour blindness
 
   Until you choose, colour e-readers with KOReader's colour rendering on start with *Red, green, blue*, and others with *Original*.
-- **Check** — highlights incorrect cells
+- **Check** — highlights incorrect colours and empty marks; untouched cells are ignored
 - **Hint** — two taps: the first says which cell is about to give, the second acts on it. A cell that contradicts the solution is always reported before a fresh one is revealed
 - **Auto-save** — puzzle state saved and restored on next launch
 
