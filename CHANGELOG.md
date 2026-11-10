@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Palette below the board with one button per colour and one for the
+  "known empty" mark (X), drawn like the grid cells. Tap a button to make
+  it active, then tap cells to apply it; tapping a cell that already has
+  it clears the cell. Marks count as empty cells for Check and for
+  solving, and are not counted as filled.
 - Display modes, chosen from the menu → Display: *Original* (same as before,
   for greyscale e-ink) *Patterns* (solid black, stripes and dots, for
   greyscale e-ink), *Red, green, blue* and *Blue, orange, purple* (for colour
@@ -13,6 +18,8 @@ All notable changes to this project will be documented in this file.
   Replaces the three grey shades, which were hard to tell apart on e-ink.
 
 ### Changed
+- Tapping a cell no longer cycles through the colours; it applies the
+  palette's active colour or mark.
 - The wrong-cell marker is now a black square with a white rim, so it
   shows on every fill.
 

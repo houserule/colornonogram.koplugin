@@ -9,6 +9,7 @@ local UIManager  = require("ui/uimanager")
 local gwb            = require("grid_widget_base")
 local GridWidgetBase = gwb.GridWidgetBase
 local drawLine       = gwb.drawLine
+local drawDiagonalLine = gwb.drawDiagonalLine
 
 local Screen         = Device.screen
 
@@ -59,6 +60,11 @@ local PALETTES = {
         [3] = Blitbuffer.colorFromString("#EE00FF"), -- purple
     },
 }
+
+-- True for the display modes that paint RGB colours (see PALETTES).
+local function isColorMode(mode)
+    return PALETTES[mode] ~= nil
+end
 
 -- Stripes and dots are aligned to (ax, ay) instead of each cell's corner,
 -- so a run of same-colour cells reads as one continuous texture.
@@ -112,6 +118,15 @@ local function paintStyle(bb, mode, v, x, y, w, h, ax, ay, cell)
     end
 end
 
+-- The "known empty" mark: same X as nonogram.koplugin's crossed cells.
+local function paintMark(bb, x, y, w, h)
+    local pad   = math.max(2, math.floor(math.min(w, h) / 8))
+    local dlen  = math.max(0, math.floor(math.min(w, h) - pad * 2))
+    local thick = math.max(1, math.floor(math.min(w, h) / 12))
+    drawDiagonalLine(bb, x + pad, y + pad,     dlen, 1,  1, C_LINE, thick)
+    drawDiagonalLine(bb, x + pad, y + h - pad, dlen, 1, -1, C_LINE, thick)
+end
+
 -- Clue number colour: white on dark fills, black on light ones (e.g. the
 -- orange), judged by the fill's luminance.
 local function clueTextColor(mode, v)
@@ -144,6 +159,8 @@ local ColorNonogramBoardWidget = GridWidgetBase:extend{
     max_height = nil,
     -- "original", "patterns", "color" or "color_alt", see Cell styles above.
     display_mode = "original",
+    -- Top-level widget (the game screen) to mark dirty on refresh().
+    show_parent = nil,
 }
 
 function ColorNonogramBoardWidget:init()
@@ -244,9 +261,16 @@ function ColorNonogramBoardWidget:onTap(_, ges)
     return true
 end
 
+-- Mark the top-level screen dirty: UIManager ignores setDirty on nested
+-- widgets. Callers so far happened to also update the status line (which
+-- dirties the screen), which is the only reason this used to work.
 function ColorNonogramBoardWidget:refresh()
     local rect = self.paint_rect
-    UIManager:setDirty(self, function()
+    -- Plain "ui" even in colour modes: on colour e-ink the colour waveforms
+    -- (dithered "partial"/"full") always do a flashing full update, which
+    -- made the whole screen flash on every tap. The screen does a colour
+    -- flash refresh at set points instead (see refreshScreen in screen.lua).
+    UIManager:setDirty(self.show_parent or self, function()
         return "ui", Geom:new{ x = rect.x, y = rect.y, w = rect.w, h = rect.h }
     end)
 end
@@ -260,6 +284,7 @@ function ColorNonogramBoardWidget:paintTo(bb, x, y)
     self.paint_rect = Geom:new{ x = x, y = y, w = self.dimen.w, h = self.dimen.h }
 
     local board  = self.board
+    local MARKED = board.MARKED
     local n      = board.n
     local cw     = self.cell_w
     local ch     = self.cell_h
@@ -364,6 +389,8 @@ function ColorNonogramBoardWidget:paintTo(bb, x, y)
             local v    = board.user[r][c]
             if v and v > 0 then
                 paintStyle(bb, mode, v, cx, cy, cew, ceh, ox, oy, cell)
+            elseif v == MARKED then
+                paintMark(bb, cx, cy, cew, ceh)
             end
             -- Wrong mark: small square in corner. Black with a white rim so
             -- it shows on every fill, including solid black and the colours.
@@ -398,5 +425,10 @@ function ColorNonogramBoardWidget:paintTo(bb, x, y)
     drawLine(bb, x, y, self.dimen.w, bthick, C_LINE)
     drawLine(bb, x, y + self.dimen.h - bthick, self.dimen.w, bthick, C_LINE)
 end
+
+-- Shared with the colour palette, so its buttons look like grid cells.
+ColorNonogramBoardWidget.paintStyle = paintStyle
+ColorNonogramBoardWidget.paintMark  = paintMark
+ColorNonogramBoardWidget.isColorMode = isColorMode
 
 return ColorNonogramBoardWidget

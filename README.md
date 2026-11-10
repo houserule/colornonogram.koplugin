@@ -41,7 +41,9 @@ Like a Nonogram but cells are filled with colours. Each clue gives a colour and 
 
 | Action | How |
 |--------|-----|
-| Cycle cell colour | Tap cell (the cycle ends back on empty) |
+| Choose a colour or the empty mark (X) | Tap it in the palette below the board |
+| Apply it to a cell | Tap cell |
+| Clear a cell | Tap it again with the same colour or mark |
 | Check progress | Tap **Check** |
 | New puzzle | Tap **New game** |
 | Show rules | Tap **Rules** |
